@@ -1,0 +1,46 @@
+# Базы данных (НЕ загружаем!)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sqlite-journal
+*/.db
+
+# Зависимости (НЕ загружаем!)
+node_modules/
+client/node_modules/
+client/src/server/node_modules/
+
+# Логи
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Файлы окружения (с паролями)
+.env
+.env.local
+.env.production
+
+# Временные файлы
+*.tmp
+*.temp
+.cache/
+
+# Сборки
+dist/
+build/
+*.pid

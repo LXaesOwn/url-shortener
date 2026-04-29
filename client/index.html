@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: #282c34; color: white; padding: 20px; text-align: center; }
+        .section { margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        input { padding: 10px; width: 300px; margin: 10px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        .result { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>URL Shortener Service</h1>
+    </div>
+
+    <div class="section">
+        <h2>Shorten a new link</h2>
+        <input type="url" id="urlInput" placeholder="Enter your long URL">
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <div id="result" class="result" style="display:none"></div>
+    </div>
+
+    <div class="section">
+        <h2>View statistics</h2>
+        <input type="text" id="codeInput" placeholder="Enter short code">
+        <button onclick="showStats()">Get Stats</button>
+        <div id="stats"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function shortenUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) return;
+
+            const response = await fetch(`${API_BASE}/shorten`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ originalUrl: url })
+            });
+            const data = await response.json();
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <p><strong>Share URL:</strong> <a href="${data.shareUrl}" target="_blank">${data.shareUrl}</a></p>
+                <p><strong>Stats URL:</strong> <a href="${data.statsUrl}" target="_blank">${data.statsUrl}</a></p>
+                <p><strong>Short Code:</strong> ${data.shortCode}</p>
+            `;
+        }
+
+        async function showStats() {
+            const code = document.getElementById('codeInput').value;
+            if (!code) return;
+
+            const response = await fetch(`${API_BASE}/stats/${code}`);
+            const data = await response.json();
+
+            let html = `<h3>Total clicks: ${data.totalClicks}</h3>`;
+            html += '<table><thead><tr><th>Date</th><th>IP</th><th>Region</th><th>Browser</th><th>OS</th></tr></thead><tbody>';
+            data.clicks.forEach(click => {
+                html += `<tr>
+                    <td>${new Date(click.date).toLocaleString()}</td>
+                    <td>${click.ip}</td>
+                    <td>${click.region}</td>
+                    <td>${click.browser}</td>
+                    <td>${click.os}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('stats').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

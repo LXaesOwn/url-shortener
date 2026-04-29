@@ -1,0 +1,89 @@
+{
+  "links": [
+    {
+      "originalUrl": "https://www.google.com/",
+      "shortCode": "Q5sZaW2Lt",
+      "shareUrl": "http://localhost:5000/Q5sZaW2Lt",
+      "statsUrl": "http://localhost:5000/stats/Q5sZaW2Lt",
+      "createdAt": "2026-04-16T14:19:58.680Z"
+    },
+    {
+      "originalUrl": "https://www.google.com/",
+      "shortCode": "uV0jOfbm6",
+      "shareUrl": "http://localhost:5000/uV0jOfbm6",
+      "statsUrl": "http://localhost:5000/stats/uV0jOfbm6",
+      "createdAt": "2026-04-16T14:31:10.859Z"
+    },
+    {
+      "originalUrl": "https://www.google.com",
+      "shortCode": "tLhqmh7GB",
+      "shareUrl": "http://localhost:5000/tLhqmh7GB",
+      "statsUrl": "http://localhost:5000/stats/tLhqmh7GB",
+      "createdAt": "2026-04-16T14:31:17.585Z"
+    },
+    {
+      "originalUrl": "https://www.youtube.com",
+      "shortCode": "8aqE9SsUr",
+      "shareUrl": "http://localhost:5000/8aqE9SsUr",
+      "statsUrl": "http://localhost:5000/stats/8aqE9SsUr",
+      "createdAt": "2026-04-16T14:32:12.623Z"
+    },
+    {
+      "originalUrl": "https://www.google.com/",
+      "shortCode": "XqKFov4D5",
+      "shareUrl": "http://localhost:5000/XqKFov4D5",
+      "statsUrl": "http://localhost:5000/stats/XqKFov4D5",
+      "createdAt": "2026-04-27T12:44:34.781Z"
+    }
+  ],
+  "clicks": [
+    {
+      "shortCode": "Q5sZaW2Lt",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-16T14:20:00.113Z"
+    },
+    {
+      "shortCode": "tLhqmh7GB",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-16T14:31:19.304Z"
+    },
+    {
+      "shortCode": "8aqE9SsUr",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-16T14:32:14.076Z"
+    },
+    {
+      "shortCode": "8aqE9SsUr",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-16T14:34:35.280Z"
+    },
+    {
+      "shortCode": "8aqE9SsUr",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-16T14:36:00.449Z"
+    },
+    {
+      "shortCode": "Q5sZaW2Lt",
+      "ip": "::1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "timestamp": "2026-04-26T15:44:32.928Z"
+    },
+    {
+      "shortCode": "XqKFov4D5",
+      "ip": "::1",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-04-27T12:44:37.712Z"
+    }
+  ]
+}
