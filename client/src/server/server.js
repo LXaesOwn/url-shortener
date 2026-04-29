@@ -26,21 +26,21 @@ function saveDB() {
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
 
-// Функция для определения браузера и ОС
+
 function parseUserAgent(userAgent) {
     let browser = 'Other';
     let os = 'Other';
     
     if (!userAgent) return { browser, os };
     
-    // Определяем браузер
+
     if (userAgent.includes('Chrome')) browser = 'Chrome';
     else if (userAgent.includes('Firefox')) browser = 'Firefox';
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
     else if (userAgent.includes('Opera')) browser = 'Opera';
     
-    // Определяем ОС
+  
     if (userAgent.includes('Windows')) os = 'Windows';
     else if (userAgent.includes('Mac')) os = 'macOS';
     else if (userAgent.includes('Linux')) os = 'Linux';
@@ -50,7 +50,7 @@ function parseUserAgent(userAgent) {
     return { browser, os };
 }
 
-// Создание короткой ссылки
+
 app.post('/shorten', (req, res) => {
     const { originalUrl } = req.body;
     
@@ -75,7 +75,6 @@ app.post('/shorten', (req, res) => {
     res.json({ shareUrl, statsUrl, shortCode });
 });
 
-// Редирект и трекинг
 app.get('/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     const link = db.links.find(l => l.shortCode === shortCode);
@@ -104,7 +103,7 @@ app.get('/:shortCode', (req, res) => {
     res.redirect(link.originalUrl);
 });
 
-// Получение статистики
+
 app.get('/stats/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     const link = db.links.find(l => l.shortCode === shortCode);
@@ -115,7 +114,7 @@ app.get('/stats/:shortCode', (req, res) => {
     
     const clicks = db.clicks.filter(c => c.shortCode === shortCode);
     
-    // Агрегируем статистику по браузерам и ОС
+ 
     const browserStats = {};
     const osStats = {};
     

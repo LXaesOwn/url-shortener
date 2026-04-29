@@ -1,4 +1,4 @@
-# Базы данных (НЕ загружаем!)
+# Базы данных 
 *.db
 *.sqlite
 *.sqlite3
@@ -6,7 +6,7 @@
 *.sqlite-journal
 */.db
 
-# Зависимости (НЕ загружаем!)
+# Зависимости 
 node_modules/
 client/node_modules/
 client/src/server/node_modules/
@@ -30,7 +30,7 @@ ehthumbs.db
 *.swo
 *~
 
-# Файлы окружения (с паролями)
+# Файлы окружения 
 .env
 .env.local
 .env.production
