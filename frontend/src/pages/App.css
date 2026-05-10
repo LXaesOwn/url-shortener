@@ -26,7 +26,12 @@ body {
   margin-top: 50px;
 }
 
-h1 {
+.card-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.card-header h1 {
   font-size: 2.5rem;
   color: #333;
   margin-bottom: 10px;
@@ -34,7 +39,6 @@ h1 {
 
 .subtitle {
   color: #666;
-  margin-bottom: 30px;
   font-size: 1.1rem;
 }
 
@@ -79,7 +83,7 @@ h1 {
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
@@ -89,17 +93,8 @@ h1 {
   color: #333;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background: #e0e0e0;
-}
-
-.btn-danger {
-  background: #ff4757;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #ff3838;
 }
 
 .result-card {
@@ -128,25 +123,9 @@ h1 {
   border: 1px solid #dee2e6;
 }
 
-.stats-button {
-  background: #17a2b8;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
 .loading {
   text-align: center;
   margin-top: 30px;
-  color: #667eea;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .spinner {
@@ -157,4 +136,17 @@ h1 {
   height: 40px;
   animation: spin 1s linear infinite;
   margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-footer {
+  margin-top: 30px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
 }

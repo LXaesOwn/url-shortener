@@ -1,11 +1,9 @@
 import { query } from '../models/db';
-import { CONSTANTS } from '../config/constants';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
 
 export class UrlService {
-
-  static generateShortCode(length: number = CONSTANTS.SHORT_CODE_LENGTH): string {
+  static generateShortCode(length: number = 6): string {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
@@ -35,7 +33,7 @@ export class UrlService {
       [originalUrl, shortCode, shareUrl, statsUrl]
     );
     
-    console.log(`Created short URL: ${shareUrl} for ${originalUrl}`);
+    console.log(`✅ Created: ${shareUrl} -> ${originalUrl}`);
     
     return { shareUrl, statsUrl };
   }

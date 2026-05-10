@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Url {
+  id        Int      @id @default(autoincrement())
+  originalUrl String  @map("original_url")
+  shortCode String   @unique @map("short_code")
+  shareUrl  String   @map("share_url")
+  statsUrl  String   @map("stats_url")
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  clickStatistics ClickStatistics[]
+  
+  @@map("urls")
+}
+
+model ClickStatistics {
+  id              Int      @id @default(autoincrement())
+  urlId           Int      @map("url_id")
+  ipAddress       String?  @map("ip_address")
+  region          String?
+  browser         String?
+  browserVersion  String?  @map("browser_version")
+  os              String?
+  deviceType      String?  @map("device_type")
+  country         String?
+  city            String?
+  clickedAt       DateTime @default(now()) @map("clicked_at")
+  
+  url Url @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  
+  @@map("click_statistics")
+}

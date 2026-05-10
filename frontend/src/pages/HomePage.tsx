@@ -30,7 +30,7 @@ const HomePage: React.FC = () => {
       dispatch(setCurrentUrl(result));
       setUrl('');
     } catch (err: any) {
-      dispatch(setError(err.response?.data?.error || 'Не удалось сократить URL. Проверьте подключение к бэкенду.'));
+      dispatch(setError(err.response?.data?.error || 'Не удалось сократить URL'));
     } finally {
       dispatch(setLoading(false));
     }
@@ -45,25 +45,41 @@ const HomePage: React.FC = () => {
     setUrl('https://www.google.com');
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    alert('Ссылка скопирована!');
+    alert(`${label} скопирована!`);
+  };
+
+  
+  const getShortCodeFromUrl = (url: string) => {
+    const match = url.match(/\/s\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : '';
+  };
+
+
+  const openStats = () => {
+    if (currentUrl) {
+      const shortCode = getShortCodeFromUrl(currentUrl.shareUrl);
+      if (shortCode) {
+        window.open(`/stats/${shortCode}`, '_blank');
+      }
+    }
   };
 
   return (
-    <div className="home-page">
-      <div className="container">
-        <div className="card">
-          <div className="card-header">
-            <h1>🚀 Сокращатель URL-адресов</h1>
-            <p className="subtitle">Сокращайте ссылки и отслеживайте их эффективность</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '40px 20px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ background: 'white', borderRadius: '20px', padding: '40px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <h1 style={{ fontSize: '2rem', color: '#333', marginBottom: '10px' }}>🚀 Сокращатель URL-адресов</h1>
+            <p style={{ color: '#666' }}>Сокращайте ссылки и отслеживайте их эффективность</p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="input-group">
+            <div style={{ marginBottom: '20px' }}>
               <input
                 type="text"
-                className="url-input"
+                style={{ width: '100%', padding: '15px', fontSize: '16px', border: '2px solid #e0e0e0', borderRadius: '10px' }}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Введите длинную ссылку (например: https://example.com)"
@@ -71,90 +87,72 @@ const HomePage: React.FC = () => {
               />
             </div>
             
-            <div className="button-group">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <button type="submit" style={{ flex: 1, padding: '12px', fontSize: '16px', fontWeight: 'bold', border: 'none', borderRadius: '10px', cursor: 'pointer', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }} disabled={loading}>
                 {loading ? 'Сокращение...' : '🔗 Сократить URL'}
               </button>
-              <button type="button" className="btn btn-secondary" onClick={handleClear} disabled={loading}>
+              <button type="button" style={{ flex: 1, padding: '12px', fontSize: '16px', fontWeight: 'bold', border: 'none', borderRadius: '10px', cursor: 'pointer', background: '#f0f0f0', color: '#333' }} onClick={handleClear} disabled={loading}>
                 🧹 Очистить
               </button>
-              <button type="button" className="btn btn-secondary" onClick={handleExample} disabled={loading}>
+              <button type="button" style={{ flex: 1, padding: '12px', fontSize: '16px', fontWeight: 'bold', border: 'none', borderRadius: '10px', cursor: 'pointer', background: '#f0f0f0', color: '#333' }} onClick={handleExample} disabled={loading}>
                 📝 Пример
               </button>
             </div>
           </form>
 
           {loading && (
-            <div className="loading-container">
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <div className="spinner"></div>
-              <div className="loading-text">Сокращаем ссылку...</div>
+              <p>Сокращаем ссылку...</p>
             </div>
           )}
 
           {error && !loading && (
-            <div className="error-card">
+            <div style={{ marginTop: '30px', padding: '15px', background: '#fff5f5', borderRadius: '10px', borderLeft: '4px solid #dc3545', color: '#dc3545' }}>
               <strong>❌ Ошибка:</strong> {error}
-              <div className="error-details">
-                Убедитесь, что бэкенд запущен на http://localhost:5000
-              </div>
             </div>
           )}
 
           {currentUrl && !loading && !error && (
-            <div className="result-card">
-              <h3>✅ Готово! Ваши ссылки:</h3>
+            <div style={{ marginTop: '30px', padding: '20px', background: '#f0fdf4', borderRadius: '10px', borderLeft: '4px solid #22c55e' }}>
+              <h3 style={{ marginBottom: '15px', color: '#16a34a' }}>✅ Готово! Ваши ссылки:</h3>
               
-              <div className="url-section">
-                <strong>🔗 Короткая ссылка (для публикации):</strong>
-                <div className="url-box">
-                  <code>{currentUrl.shareUrl}</code>
-                </div>
-                <div className="button-row">
-                  <button 
-                    className="url-button url-button-copy"
-                    onClick={() => copyToClipboard(currentUrl.shareUrl)}
-                  >
+              {/* Короткая ссылка */}
+              <div style={{ marginBottom: '20px', padding: '15px', background: 'white', borderRadius: '8px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>🔗 Короткая ссылка:</div>
+                <code style={{ display: 'block', background: '#f3f4f6', padding: '10px', borderRadius: '6px', wordBreak: 'break-all', marginBottom: '10px' }}>
+                  {currentUrl.shareUrl}
+                </code>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => copyToClipboard(currentUrl.shareUrl, 'Короткая ссылка')} style={{ padding: '8px 16px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
                     📋 Скопировать
                   </button>
-                  <button 
-                    className="url-button url-button-open"
-                    onClick={() => window.open(currentUrl.shareUrl, '_blank')}
-                  >
-                    🔗 Открыть
+                  <button onClick={() => window.open(currentUrl.shareUrl, '_blank')} style={{ padding: '8px 16px', background: '#22c55e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+                    🔗 Открыть ссылку
                   </button>
                 </div>
               </div>
 
-              <div className="url-section">
-                <strong>📊 Ссылка для статистики:</strong>
-                <div className="url-box">
-                  <code>{currentUrl.statsUrl}</code>
-                </div>
-                <div className="button-row">
-                  <button 
-                    className="url-button url-button-copy"
-                    onClick={() => copyToClipboard(currentUrl.statsUrl)}
-                  >
+              {/* Ссылка для статистики */}
+              <div style={{ padding: '15px', background: 'white', borderRadius: '8px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>📊 Ссылка для статистики:</div>
+                <code style={{ display: 'block', background: '#f3f4f6', padding: '10px', borderRadius: '6px', wordBreak: 'break-all', marginBottom: '10px' }}>
+                  {currentUrl.statsUrl}
+                </code>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => copyToClipboard(currentUrl.statsUrl, 'Ссылка статистики')} style={{ padding: '8px 16px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
                     📋 Скопировать
                   </button>
-                  <button 
-                    className="url-button url-button-stats"
-                    onClick={() => window.open(currentUrl.statsUrl, '_blank')}
-                  >
-                    📈 Смотреть статистику
+                  <button onClick={openStats} style={{ padding: '8px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+                    📊 Смотреть статистику
                   </button>
                 </div>
               </div>
             </div>
           )}
-          
-          <div className="card-footer">
-            <small>🔒 Безопасно • Быстро • Бесплатно</small>
-          </div>
         </div>
       </div>
     </div>
   );
 };
-
 export default HomePage;
