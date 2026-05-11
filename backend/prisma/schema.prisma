@@ -29,9 +29,6 @@ model ClickStatistics {
   browser         String?
   browserVersion  String?  @map("browser_version")
   os              String?
-  deviceType      String?  @map("device_type")
-  country         String?
-  city            String?
   clickedAt       DateTime @default(now()) @map("clicked_at")
   
   url Url @relation(fields: [urlId], references: [id], onDelete: Cascade)
