@@ -1,129 +1,67 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { shortenUrl } from '../api/client';
 import { setLoading, setCurrentUrl, setError } from '../store/urlSlice';
-import { CONSTANTS } from '../config/constants';
+import { Input } from './ui/Input';
+import { Button } from './ui/Button';
+import styles from './UrlForm.module.css';
 
-const UrlForm: React.FC = () => {
-  const [url, setUrl] = useState('');
+interface FormValues {
+  url: string;
+}
+
+export const UrlForm: React.FC = () => {
   const dispatch = useDispatch();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!url) {
-      dispatch(setError('Please enter a URL'));
-      return;
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
+    defaultValues: {
+      url: ''
     }
-    
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    let finalUrl = data.url;
+    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+      finalUrl = 'https://' + finalUrl;
+    }
+
     dispatch(setLoading(true));
     dispatch(setError(null));
-    
+
     try {
-      const result = await shortenUrl(url);
+      const result = await shortenUrl(finalUrl);
       dispatch(setCurrentUrl(result));
-      setUrl('');
-    } catch (error: any) {
-      console.error('Error:', error);
-      dispatch(setError(error.response?.data?.error || 'Failed to shorten URL'));
+      reset();
+    } catch (err: any) {
+      dispatch(setError(err.response?.data?.error || 'Failed to shorten URL'));
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const handleClear = () => {
-    setUrl('');
-    dispatch(setError(null));
-  };
-
   const handleExample = () => {
-    setUrl('https://www.example.com');
+    reset({ url: 'https://www.google.com' });
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '700px', margin: '0 auto' }}>
-      <form onSubmit={handleSubmit}>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter your long URL here (e.g., https://example.com)"
-            style={{ 
-              flex: 1, 
-              padding: '14px', 
-              fontSize: '16px', 
-              border: '2px solid #ddd', 
-              borderRadius: '8px',
-              outline: 'none',
-              transition: 'border-color 0.3s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#4CAF50'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            type="submit" 
-            style={{ 
-              flex: 1,
-              padding: '12px 24px', 
-              fontSize: '16px', 
-              backgroundColor: '#4CAF50', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-          >
-            🔗 Shorten URL
-          </button>
-          <button 
-            type="button"
-            onClick={handleClear}
-            style={{ 
-              padding: '12px 24px', 
-              fontSize: '16px', 
-              backgroundColor: '#f44336', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#da190b'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f44336'}
-          >
-            🗑️ Clear
-          </button>
-          <button 
-            type="button"
-            onClick={handleExample}
-            style={{ 
-              padding: '12px 24px', 
-              fontSize: '16px', 
-              backgroundColor: '#2196F3', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'background-color 0.3s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0b7dda'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
-          >
-            📝 Example
-          </button>
-        </div>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+      <Input
+        {...register('url', { 
+          required: 'URL is required',
+          maxLength: { value: 2048, message: 'URL is too long' }
+        })}
+        placeholder="Enter your long URL here (e.g., https://example.com)"
+        error={errors.url?.message}
+      />
+      
+      <div className={styles.buttonGroup}>
+        <Button type="submit" loading={isSubmitting} variant="primary">
+          🔗 Shorten URL
+        </Button>
+        <Button type="button" variant="secondary" onClick={handleExample}>
+          📝 Example
+        </Button>
+      </div>
+    </form>
   );
 };
-
-export default UrlForm;
