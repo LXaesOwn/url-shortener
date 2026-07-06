@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import urlRoutes from './routes/urlRoutes';
 import statsRoutes from './routes/statsRoutes';
 import { env } from './config/env';
+import { errorHandler } from './middleware/errorHandler';
+import { limiter } from './middleware/rateLimiter';
 import { StatusCodes } from 'http-status-codes';
 import os from 'os';
 
@@ -12,15 +14,17 @@ dotenv.config();
 const app = express();
 const PORT = env.PORT;
 
+app.use(limiter);
+
 app.use(cors({
   origin: env.FRONTEND_URL,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 app.use('/api', statsRoutes);
 app.use('/api', urlRoutes);
@@ -28,6 +32,8 @@ app.use('/api', urlRoutes);
 app.get('/health', (req, res) => {
   res.status(StatusCodes.OK).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+app.use(errorHandler);
 
 const interfaces = os.networkInterfaces();
 for (const name of Object.keys(interfaces)) {
