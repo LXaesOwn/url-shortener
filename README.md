@@ -64,7 +64,7 @@ npm start
 bash
 docker-compose up --build
 docker-compose down
-📊 API Endpoints
+API Endpoints
 Метод	Эндпоинт	Описание
 POST	/api/shorten	Создать короткую ссылку
 GET	/api/s/:code	Редирект по короткой ссылке
@@ -79,7 +79,7 @@ curl -X POST http://localhost:5000/api/shorten \
   "shareUrl": "http://localhost:5000/api/s/abc123",
   "statsUrl": "http://localhost:5000/api/stats/abc123"
 }
-📁 Структура проекта
+Структура проекта
 text
 url-shortener/
 ├── backend/
