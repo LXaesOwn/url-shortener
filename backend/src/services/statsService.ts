@@ -80,7 +80,6 @@ export class StatsService {
     };
   }
 
-
   static async getAllUrls() {
     return prisma.url.findMany({
       orderBy: { createdAt: 'desc' },

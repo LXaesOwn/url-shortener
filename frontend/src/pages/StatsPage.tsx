@@ -1,38 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getStats } from '../api/client';
+import { IStatsResponse } from '../types';
 import styles from './StatsPage.module.css';
-
-interface ClickData {
-  id: number;
-  ip_address: string;
-  region: string;
-  browser: string;
-  browser_version: string;
-  os: string;
-  clicked_at: string;
-}
-
-interface StatsData {
-  url: {
-    originalUrl: string;
-    shareUrl: string;
-    statsUrl: string;
-    totalClicks: number;
-    createdAt: string;
-  };
-  stats: {
-    totalClicks: number;
-    browserStats: Record<string, number>;
-    osStats: Record<string, number>;
-    countryStats: Record<string, number>;
-    allClicks: ClickData[];
-  };
-}
 
 const StatsPage: React.FC = () => {
   const { shortCode } = useParams();
-  const [data, setData] = useState<StatsData | null>(null);
+  const [data, setData] = useState<IStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +24,23 @@ const StatsPage: React.FC = () => {
     };
     fetchStats();
   }, [shortCode]);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Нет данных';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return date.toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
 
   if (loading) {
     return (
@@ -74,9 +65,10 @@ const StatsPage: React.FC = () => {
     );
   }
 
-  const totalClicks = data.stats?.totalClicks || 0;
-  const browserData = Object.entries(data.stats?.browserStats || {});
-  const osData = Object.entries(data.stats?.osStats || {});
+  const { url, stats } = data;
+  const totalClicks = stats.totalClicks || 0;
+  const browserData = Object.entries(stats.browserStats || {});
+  const allClicks = stats.allClicks || [];
 
   return (
     <div className={styles.container}>
@@ -88,15 +80,19 @@ const StatsPage: React.FC = () => {
       <div className={styles.infoCard}>
         <div className={styles.infoRow}>
           <span className={styles.infoLabel}>🔗 Original URL:</span>
-          <a href={data.url.originalUrl} target="_blank" rel="noopener noreferrer">
-            {data.url.originalUrl}
+          <a href={url.originalUrl} target="_blank" rel="noopener noreferrer">
+            {url.originalUrl}
           </a>
         </div>
         <div className={styles.infoRow}>
           <span className={styles.infoLabel}>📎 Short URL:</span>
-          <a href={data.url.shareUrl} target="_blank" rel="noopener noreferrer">
-            {data.url.shareUrl}
+          <a href={url.shareUrl} target="_blank" rel="noopener noreferrer">
+            {url.shareUrl}
           </a>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.infoLabel}>📅 Created:</span>
+          <span>{formatDate(url.createdAt)}</span>
         </div>
       </div>
 
@@ -109,10 +105,6 @@ const StatsPage: React.FC = () => {
           <div className={styles.statValue}>{browserData.length}</div>
           <div className={styles.statLabel}>Browsers</div>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statValue}>{osData.length}</div>
-          <div className={styles.statLabel}>OS</div>
-        </div>
       </div>
 
       {browserData.length > 0 && (
@@ -123,33 +115,42 @@ const StatsPage: React.FC = () => {
               <div className={styles.statLabel}>{name}</div>
               <div className={styles.progressWrapper}>
                 <div className={styles.progressBar}>
-                  <div 
+                  <div
                     className={styles.progressFill}
                     style={{ width: `${(count / totalClicks) * 100}%` }}
                   />
                 </div>
-                <div className={styles.statCount}>{count} ({Math.round((count / totalClicks) * 100)}%)</div>
+                <div className={styles.statCount}>
+                  {count} ({Math.round((count / totalClicks) * 100)}%)
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {data.stats?.allClicks && data.stats.allClicks.length > 0 && (
+      {allClicks.length > 0 && (
         <div className={styles.section}>
           <h2>📋 Details</h2>
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
-                <tr><th>Time</th><th>IP</th><th>Browser</th><th>OS</th></tr>
+                <tr>
+                  <th>Time</th>
+                  <th>IP Address</th>
+                  <th>Browser</th>
+                  <th>Version</th>
+                  <th>OS</th>
+                </tr>
               </thead>
               <tbody>
-                {data.stats.allClicks.map((click) => (
+                {allClicks.map((click) => (
                   <tr key={click.id}>
-                    <td>{new Date(click.clicked_at).toLocaleString()}</td>
-                    <td>{click.ip_address}</td>
-                    <td>{click.browser}</td>
-                    <td>{click.os}</td>
+                    <td>{formatDate(click.clickedAt)}</td>
+                    <td>{click.ipAddress || 'Unknown'}</td>
+                    <td>{click.browser || 'Unknown'}</td>
+                    <td>{click.browserVersion || 'Unknown'}</td>
+                    <td>{click.os || 'Unknown'}</td>
                   </tr>
                 ))}
               </tbody>

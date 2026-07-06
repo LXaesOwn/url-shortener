@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { UrlService } from '../services/urlService';
 import { StatsService } from '../services/statsService';
-import prisma from '../services/prismaService';
 
 export class UrlController {
   static async shortenUrl(req: Request, res: Response) {
@@ -22,13 +21,10 @@ export class UrlController {
 
       const { shareUrl, statsUrl } = await UrlService.createShortUrl(urlToShorten);
 
-      res.status(StatusCodes.CREATED).json({
-        shareUrl,
-        statsUrl,
-      });
+      return res.status(StatusCodes.CREATED).json({ shareUrl, statsUrl });
     } catch (error) {
       console.error('Error shortening URL:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to shorten URL',
       });
     }
@@ -38,33 +34,22 @@ export class UrlController {
     try {
       const { shortCode } = req.params;
 
-      const url = await prisma.url.findUnique({
-        where: { shortCode },
-      });
+      const url = await UrlService.getUrlByShortCode(shortCode);
 
       if (!url) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          error: 'URL not found',
-        });
+        return res.status(StatusCodes.NOT_FOUND).json({ error: 'URL not found' });
       }
 
-      await prisma.url.update({
-        where: { shortCode },
-        data: { clicks: { increment: 1 } },
-      });
+      await UrlService.incrementClicks(shortCode);
 
-      const userInfo = {
-        ip: req.ip || req.socket.remoteAddress || 'unknown',
-        userAgent: req.headers['user-agent'] || 'unknown',
-        referer: String(req.headers.referer || req.headers.referrer || 'direct'),
-      };
+      if (req.userInfo) {
+        await StatsService.trackClick(url.id, req.userInfo);
+      }
 
-      await StatsService.trackClick(url.id, userInfo);
-
-      res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
+      return res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
     } catch (error) {
       console.error('Error redirecting:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: 'Failed to redirect',
       });
     }

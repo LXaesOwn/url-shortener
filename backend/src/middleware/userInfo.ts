@@ -10,12 +10,14 @@ declare global {
 }
 
 export const getUserInfo = (req: Request, res: Response, next: NextFunction) => {
-  const userInfo: IUserInfo = {
-    ip: String(req.ip || req.socket.remoteAddress || 'Unknown'),
-    userAgent: String(req.headers['user-agent'] || 'Unknown'),
-    referer: String(req.headers.referer || req.headers.referrer || 'Direct')
+  const referer = req.headers.referer || req.headers.referrer;
+  const refererString = Array.isArray(referer) ? referer[0] : referer;
+
+  req.userInfo = {
+    ip: String(req.ip || req.socket.remoteAddress || 'unknown'),
+    userAgent: String(req.headers['user-agent'] || 'unknown'),
+    referer: refererString || 'direct',
   };
-  
-  req.userInfo = userInfo;
+
   next();
 };

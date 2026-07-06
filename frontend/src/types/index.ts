@@ -13,16 +13,23 @@ export interface IUrlStats {
 
 export interface IClickData {
   id: number;
-  url_id: number;
-  ip_address: string;
+  urlId: number;
+  ipAddress: string;
   region: string;
   browser: string;
-  browser_version: string;
+  browserVersion: string;
   os: string;
-  clicked_at: string;
+  clickedAt: string;
 }
 
 export interface IStatsResponse {
   url: IUrlStats;
-  clicks: IClickData[];
+  stats: {
+    totalClicks: number;
+    browserStats: Record<string, number>;
+    osStats: Record<string, number>;
+    countryStats: Record<string, number>;
+    clicksByDate: Record<string, number>;
+    allClicks: IClickData[];
+  };
 }
