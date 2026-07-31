@@ -4,3 +4,8 @@ export const CONSTANTS = {
   MAX_GENERATION_ATTEMPTS: 1000,
   API_PREFIX: '/api',
 } as const;
+
+export const UNKNOWN = 'unknown';
+export const DIRECT = 'direct';
+export const LOCALHOST = 'localhost';
+export const LOCAL_NETWORK = 'local_network';

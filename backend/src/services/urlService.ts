@@ -1,15 +1,11 @@
-import prisma from './prismaService';
+import { nanoid } from 'nanoid';
+import { urlRepository } from '../repositories/urlRepository';
 import { env } from '../config/env';
 import { CONSTANTS } from '../config/constants';
 
 export class UrlService {
   static generateShortCode(length: number = CONSTANTS.SHORT_CODE_LENGTH): string {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    return nanoid(length);
   }
 
   static async createShortUrl(originalUrl: string): Promise<{ shareUrl: string; statsUrl: string }> {
@@ -18,7 +14,7 @@ export class UrlService {
     let attempts = 0;
 
     while (!isUnique && attempts < CONSTANTS.MAX_GENERATION_ATTEMPTS) {
-      const existing = await prisma.url.findUnique({ where: { shortCode } });
+      const existing = await urlRepository.findByShortCode(shortCode);
       if (!existing) {
         isUnique = true;
       } else {
@@ -34,24 +30,29 @@ export class UrlService {
     const shareUrl = `${env.BASE_URL}/api/s/${shortCode}`;
     const statsUrl = `${env.BASE_URL}/api/stats/${shortCode}`;
 
-    await prisma.url.create({
-      data: { originalUrl, shortCode, shareUrl, statsUrl },
+    await urlRepository.create({
+      originalUrl,
+      shortCode,
+      shareUrl,
+      statsUrl,
     });
 
     return { shareUrl, statsUrl };
   }
 
-  static async getUrlByShortCode(shortCode: string) {
-    return prisma.url.findUnique({
-      where: { shortCode },
-      include: { clickStatistics: true },
-    });
+  static async getOriginalUrl(shortCode: string) {
+    return urlRepository.findOriginalUrl(shortCode);
   }
 
   static async incrementClicks(shortCode: string) {
-    return prisma.url.update({
-      where: { shortCode },
-      data: { clicks: { increment: 1 } },
-    });
+    return urlRepository.incrementClicks(shortCode);
+  }
+
+  static async getUrlWithStats(shortCode: string) {
+    return urlRepository.findByShortCodeWithStats(shortCode);
+  }
+
+  static async getAllUrls() {
+    return urlRepository.findAll();
   }
 }

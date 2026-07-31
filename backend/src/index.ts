@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import urlRoutes from './routes/urlRoutes';
 import statsRoutes from './routes/statsRoutes';
@@ -9,11 +11,12 @@ import { limiter } from './middleware/rateLimiter';
 import { StatusCodes } from 'http-status-codes';
 import os from 'os';
 
-dotenv.config();
 
 const app = express();
 const PORT = env.PORT;
 
+app.use(helmet());
+app.use(compression());
 app.use(limiter);
 
 app.use(cors({

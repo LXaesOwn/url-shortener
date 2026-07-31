@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { z } from 'zod';
 import { UrlService } from '../services/urlService';
@@ -8,19 +8,12 @@ import { AppError } from '../utils/AppError';
 import logger from '../utils/logger';
 
 export class UrlController {
-  static async shortenUrl(req: Request, res: Response) {
+  static async shortenUrl(req: Request, res: Response, next: NextFunction) {
     try {
       const { originalUrl } = urlSchema.parse(req.body);
+      const { shareUrl, statsUrl } = await UrlService.createShortUrl(originalUrl);
 
-      let urlToShorten = originalUrl;
-      if (!urlToShorten.startsWith('http://') && !urlToShorten.startsWith('https://')) {
-        urlToShorten = 'https://' + urlToShorten;
-      }
-
-      const { shareUrl, statsUrl } = await UrlService.createShortUrl(urlToShorten);
-
-      logger.info(`URL shortened successfully: ${shareUrl}`, { originalUrl, shareUrl });
-
+      logger.info(`URL shortened successfully: ${shareUrl}`);
       return res.status(StatusCodes.CREATED).json({ shareUrl, statsUrl });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -32,40 +25,38 @@ export class UrlController {
           })),
         });
       }
-      logger.error('Failed to shorten URL', { error });
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to shorten URL',
-      });
+      next(error);
     }
   }
 
-  static async redirectToOriginal(req: Request, res: Response) {
+  static async redirectToOriginal(req: Request, res: Response, next: NextFunction) {
     try {
       const { shortCode } = req.params;
 
-      const url = await UrlService.getUrlByShortCode(shortCode);
+      const url = await UrlService.getOriginalUrl(shortCode);
 
       if (!url) {
         throw new AppError('URL not found', StatusCodes.NOT_FOUND);
       }
 
-      await UrlService.incrementClicks(shortCode);
+      res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
 
-      if (req.userInfo) {
-        await StatsService.trackClick(url.id, req.userInfo);
-      }
-
-      logger.info(`Redirect successful: ${shortCode} -> ${url.originalUrl}`);
-
-      return res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
+      setImmediate(async () => {
+        try {
+          await UrlService.incrementClicks(shortCode);
+          if (req.userInfo) {
+            await StatsService.trackClick(url.id, req.userInfo);
+          }
+          logger.info(`Redirect tracked: ${shortCode}`);
+        } catch (err) {
+          logger.error('Failed to track redirect stats', { error: err, shortCode });
+        }
+      });
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ error: error.message });
       }
-      logger.error('Redirect failed', { error, shortCode: req.params.shortCode });
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to redirect',
-      });
+      next(error);
     }
   }
 }

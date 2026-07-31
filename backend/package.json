@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
+    "@types/nanoid": "^2.1.0",
     "axios": "^1.6.2",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -16,15 +17,15 @@
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
     "http-status-codes": "^2.3.0",
-    "pg": "^8.11.3",
+    "nanoid": "^6.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/helmet": "^0.0.48",
     "@types/node": "^20.10.4",
-    "@types/pg": "^8.10.9",
     "nodemon": "^3.0.2",
     "prisma": "5.22.0",
     "ts-node": "^10.9.2",

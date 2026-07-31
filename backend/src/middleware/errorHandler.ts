@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../utils/AppError';
+import { env } from '../config/env';
+import logger from '../utils/logger';
 
 export function errorHandler(
   err: Error | AppError,
@@ -8,7 +10,6 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ): void {
-  
   if (res.headersSent) {
     return next(err);
   }
@@ -16,10 +17,15 @@ export function errorHandler(
   const statusCode = err instanceof AppError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
   const message = err.message || 'Internal Server Error';
 
-  console.error(`[${new Date().toISOString()}] ERROR:`, err.stack || err.message);
+  logger.error(`[${statusCode}] ${message}`, {
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+  });
 
   res.status(statusCode).json({
     error: message,
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+    ...(env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
   });
 }
