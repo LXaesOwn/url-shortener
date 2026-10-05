@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { env } from '../config/env';
+import logger from '../utils/logger';
 
 export const LOCATION_TYPE = {
   LOCALHOST: 'localhost',
   LOCAL_NETWORK: 'local_network',
   UNKNOWN: 'unknown',
+  UNAVAILABLE: 'geo_unavailable',
 } as const;
 
 export async function fetchGeoData(ip: string) {
@@ -15,7 +17,7 @@ export async function fetchGeoData(ip: string) {
     });
     return response.data;
   } catch (error) {
-    console.error(`Geo API error for IP ${ip}:`, error);
+    logger.warn({ err: error, ip }, 'Geo API unavailable');
     return null;
   }
 }
@@ -30,7 +32,12 @@ export async function getRegion(ip: string): Promise<string> {
   }
 
   const data = await fetchGeoData(ip);
-  if (data?.status === 'success') {
+
+  if (!data) {
+    return LOCATION_TYPE.UNAVAILABLE;
+  }
+
+  if (data.status === 'success') {
     const { country, regionName, city } = data;
     return `${country || 'unknown'}, ${regionName || 'unknown'}, ${city || 'unknown'}`;
   }

@@ -17,12 +17,13 @@ export function errorHandler(
   const statusCode = err instanceof AppError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
   const message = err.message || 'Internal Server Error';
 
-  logger.error(`[${statusCode}] ${message}`, {
-    stack: err.stack,
+  logger.error({
+    err,
+    statusCode,
     path: req.path,
     method: req.method,
     ip: req.ip,
-  });
+  }, message);
 
   res.status(statusCode).json({
     error: message,

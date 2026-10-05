@@ -13,7 +13,7 @@ export class UrlController {
       const { originalUrl } = urlSchema.parse(req.body);
       const { shareUrl, statsUrl } = await UrlService.createShortUrl(originalUrl);
 
-      logger.info(`URL shortened successfully: ${shareUrl}`);
+      logger.info({ shareUrl }, 'URL shortened successfully');
       return res.status(StatusCodes.CREATED).json({ shareUrl, statsUrl });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -32,26 +32,26 @@ export class UrlController {
   static async redirectToOriginal(req: Request, res: Response, next: NextFunction) {
     try {
       const { shortCode } = req.params;
+      logger.info({ shortCode }, 'Redirect requested');
 
       const url = await UrlService.getOriginalUrl(shortCode);
 
       if (!url) {
+        logger.warn({ shortCode }, 'URL not found');
         throw new AppError('URL not found', StatusCodes.NOT_FOUND);
       }
 
-      res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
-
-      setImmediate(async () => {
-        try {
-          await UrlService.incrementClicks(shortCode);
-          if (req.userInfo) {
-            await StatsService.trackClick(url.id, req.userInfo);
-          }
-          logger.info(`Redirect tracked: ${shortCode}`);
-        } catch (err) {
-          logger.error('Failed to track redirect stats', { error: err, shortCode });
+      try {
+        await UrlService.incrementClicks(shortCode);
+        if (req.userInfo) {
+          await StatsService.trackClick(url.id, req.userInfo);
         }
-      });
+        logger.info({ shortCode }, 'Stats tracked successfully');
+      } catch (err) {
+        logger.error({ err, shortCode }, 'Failed to track stats');
+      }
+
+      return res.redirect(StatusCodes.MOVED_TEMPORARILY, url.originalUrl);
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ error: error.message });

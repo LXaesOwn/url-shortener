@@ -1,51 +1,30 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { StatsService } from '../services/statsService';
-import prisma from '../services/prismaService';
+import { AppError } from '../utils/AppError';
 
 export class StatsController {
-  static async getStats(req: Request, res: Response) {
+  static async getStats(req: Request, res: Response, next: NextFunction) {
     try {
       const { shortCode } = req.params;
-      const url = await prisma.url.findUnique({
-        where: { shortCode },
-      });
+      const payload = await StatsService.getStatsPage(shortCode);
 
-      if (!url) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-          error: 'URL not found',
-        });
+      if (!payload) {
+        throw new AppError('URL not found', StatusCodes.NOT_FOUND);
       }
 
-      const detailedStats = await StatsService.getDetailedStats(shortCode);
-
-      res.status(StatusCodes.OK).json({
-        url: {
-          originalUrl: url.originalUrl,
-          shareUrl: url.shareUrl,
-          statsUrl: url.statsUrl,
-          totalClicks: url.clicks,
-          createdAt: url.createdAt,
-        },
-        stats: detailedStats,
-      });
+      return res.status(StatusCodes.OK).json(payload);
     } catch (error) {
-      console.error('Error getting stats:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get statistics',
-      });
+      next(error);
     }
   }
 
-  static async getAllStats(req: Request, res: Response) {
+  static async getAllStats(req: Request, res: Response, next: NextFunction) {
     try {
       const urls = await StatsService.getAllUrls();
-      res.status(StatusCodes.OK).json(urls);
+      return res.status(StatusCodes.OK).json(urls);
     } catch (error) {
-      console.error('Error getting all stats:', error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: 'Failed to get statistics',
-      });
+      next(error);
     }
   }
 }

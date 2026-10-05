@@ -11,12 +11,12 @@ export interface IUrl {
 export interface IClickData {
   id: number;
   urlId: number;
-  ipAddress: string;
-  region: string;
-  browser: string;
-  browserVersion: string;
-  os: string;
-  deviceType: string;
+  ipAddress: string | null;
+  region: string | null;
+  browser: string | null;
+  browserVersion: string | null;
+  os: string | null;
+  deviceType: string | null;
   clickedAt: Date;
 }
 

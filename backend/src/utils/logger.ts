@@ -1,18 +1,20 @@
-export const logger = {
-  info: (message: string, meta?: any) => {
-    console.log(`[INFO] ${new Date().toISOString()} - ${message}`, meta || '');
-  },
-  error: (message: string, meta?: any) => {
-    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, meta || '');
-  },
-  warn: (message: string, meta?: any) => {
-    console.warn(`[WARN] ${new Date().toISOString()} - ${message}`, meta || '');
-  },
-  debug: (message: string, meta?: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug(`[DEBUG] ${new Date().toISOString()} - ${message}`, meta || '');
-    }
-  },
-};
+import pino from 'pino';
+import { env } from '../config/env';
+
+const isDevelopment = env.NODE_ENV === 'development';
+
+export const logger = pino({
+  level: env.LOG_LEVEL,
+  transport: isDevelopment
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'SYS:standard',
+          ignore: 'pid,hostname',
+        },
+      }
+    : undefined,
+});
 
 export default logger;

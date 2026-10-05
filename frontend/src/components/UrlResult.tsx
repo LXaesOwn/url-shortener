@@ -8,10 +8,10 @@ import styles from './UrlResult.module.css';
 
 export const UrlResult: React.FC = () => {
   const { currentUrl, loading, error } = useSelector((state: RootState) => state.url);
-  const { copy, copied } = useCopyToClipboard(CONSTANTS.COPY_TIMEOUT_MS || 2000);
+  const { copy, copied } = useCopyToClipboard(CONSTANTS.COPY_TIMEOUT_MS);
 
   const getShortCode = (url: string) => {
-    const match = url.match(/\/s\/([a-zA-Z0-9]+)/);
+    const match = url.match(CONSTANTS.SHORT_CODE_PATH_RE);
     return match ? match[1] : '';
   };
 
@@ -28,20 +28,14 @@ export const UrlResult: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className={styles.loading}>⏳ Shortening your URL...</div>;
-  }
-
-  if (error) {
-    return <div className={styles.error}>❌ Error: {error}</div>;
-  }
-
+  if (loading) return <div className={styles.loading}>⏳ Shortening your URL...</div>;
+  if (error) return <div className={styles.error}>❌ Error: {error}</div>;
   if (!currentUrl) return null;
 
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>✅ URL Shortened Successfully!</h3>
-      
+
       <div className={styles.card}>
         <strong>🔗 Share URL:</strong>
         <code className={styles.code}>{currentUrl.shareUrl}</code>

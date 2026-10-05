@@ -22,7 +22,7 @@ export const env = {
   NODE_ENV: defaultString(process.env.NODE_ENV, 'development'),
   DATABASE_URL: required(process.env.DATABASE_URL, 'DATABASE_URL'),
   DB_HOST: defaultString(process.env.DB_HOST, 'localhost'),
-  DB_PORT: defaultNumber(process.env.DB_PORT, 5432),
+  DB_PORT: defaultNumber(process.env.DB_PORT, 5432), 
   DB_USER: defaultString(process.env.DB_USER, 'postgres'),
   DB_PASSWORD: required(process.env.DB_PASSWORD, 'DB_PASSWORD'),
   DB_NAME: defaultString(process.env.DB_NAME, 'url_shortener'),

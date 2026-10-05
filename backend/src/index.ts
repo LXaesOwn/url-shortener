@@ -1,36 +1,21 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import dotenv from 'dotenv';
-import urlRoutes from './routes/urlRoutes';
-import statsRoutes from './routes/statsRoutes';
 import { env } from './config/env';
-import { errorHandler } from './middleware/errorHandler';
+import { applySecurityMiddleware } from './middleware/securityHeaders';
 import { limiter } from './middleware/rateLimiter';
+import { errorHandler } from './middleware/errorHandler';
+import apiRouter from './routes';
 import { StatusCodes } from 'http-status-codes';
 import os from 'os';
-
 
 const app = express();
 const PORT = env.PORT;
 
-app.use(helmet());
-app.use(compression());
+applySecurityMiddleware(app);
 app.use(limiter);
-
-app.use(cors({
-  origin: env.FRONTEND_URL,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-app.use('/api', statsRoutes);
-app.use('/api', urlRoutes);
+app.use('/api', apiRouter);
 
 app.get('/health', (req, res) => {
   res.status(StatusCodes.OK).json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -49,7 +34,4 @@ for (const name of Object.keys(interfaces)) {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`📍 Local: http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`🔗 Health: http://localhost:${PORT}/health`);
 });
